@@ -1,0 +1,12 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "RAILPACK",
+    "buildCommand": "cd client && npm install && npm run build && cd ../server && npm install && npx drizzle-kit push"
+  },
+  "deploy": {
+    "startCommand": "cd server && npx tsx src/index.ts",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}
