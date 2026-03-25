@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
-import { mkdirSync } from 'fs';
+import { mkdirSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { config } from './config.js';
@@ -45,6 +45,16 @@ async function main() {
   app.use('/api/alerts', alertsRouter);
   app.use('/api/status', statusRouter);
   app.use('/api/ac', acRouter);
+
+  // Serve built client in production
+  const clientDist = resolve(__dirname, '../../client/dist');
+  if (existsSync(clientDist)) {
+    app.use(express.static(clientDist));
+    app.get('*', (_req, res) => {
+      res.sendFile(resolve(clientDist, 'index.html'));
+    });
+    console.log('[server] Serving client from', clientDist);
+  }
 
   app.listen(config.port, () => {
     console.log(`[server] Listening on http://localhost:${config.port}`);

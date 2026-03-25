@@ -13,6 +13,7 @@ export const swaggerDocument = {
     { name: 'Device', description: 'Inverter device data and chart parameters' },
     { name: 'Weather', description: '7-day weather forecast' },
     { name: 'Alerts', description: 'Plant alerts and warnings' },
+    { name: 'AC', description: 'Air conditioning control via Tuya Smart IR' },
     { name: 'System', description: 'Server health and poller status' },
   ],
   paths: {
@@ -292,6 +293,93 @@ export const swaggerDocument = {
         },
       },
     },
+    '/ac/state': {
+      get: {
+        tags: ['AC'],
+        summary: 'Get AC state',
+        description: 'Returns the current AC state (power, temperature, mode, fan). Persisted in DB — survives server restarts.',
+        responses: {
+          200: {
+            description: 'AC state',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ACState' },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/ac/power': {
+      post: {
+        tags: ['AC'],
+        summary: 'Toggle AC power',
+        description: 'Turns the AC on or off via IR blaster. When turning on, uses the last saved temperature.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: { on: { type: 'boolean', description: 'true = power on, false = power off' } },
+                required: ['on'],
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'Updated AC state',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    ok: { type: 'boolean' },
+                    state: { $ref: '#/components/schemas/ACState' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/ac/temp': {
+      post: {
+        tags: ['AC'],
+        summary: 'Set AC temperature',
+        description: 'Sets AC temperature (16-30°C). Sends power on first, then the temperature IR code. Cold mode, auto fan.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: { temp: { type: 'integer', minimum: 16, maximum: 30, description: 'Target temperature in °C' } },
+                required: ['temp'],
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'Updated AC state',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    ok: { type: 'boolean' },
+                    state: { $ref: '#/components/schemas/ACState' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     '/status': {
       get: {
         tags: ['System'],
@@ -391,6 +479,16 @@ export const swaggerDocument = {
           batterySoc: { type: 'number', description: '%' },
           wireStatus: { type: 'string' },
           batteryStatus: { type: 'string' },
+        },
+      },
+    },
+      ACState: {
+        type: 'object',
+        properties: {
+          power: { type: 'boolean', description: 'AC on/off' },
+          temp: { type: 'integer', description: 'Temperature (16-30°C)' },
+          mode: { type: 'integer', description: '0=Cool (only mode with learned codes)' },
+          fan: { type: 'integer', description: '0=Auto (only speed with learned codes)' },
         },
       },
     },

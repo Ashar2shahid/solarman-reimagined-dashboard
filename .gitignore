@@ -9,6 +9,9 @@ server/drizzle/
 # Client
 .playwright-mcp/
 
+# Claude
+.claude/
+
 # Environment
 .env
 
