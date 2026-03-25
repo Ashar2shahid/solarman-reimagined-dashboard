@@ -24,12 +24,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 mkdirSync(resolve(__dirname, '../data'), { recursive: true });
 
 async function main() {
-  // ── Phase 1: Backfill all historical data ──
-  console.log('[server] Starting backfill (server will start after completion)...');
-  await runBackfill();
-  console.log('[server] Backfill complete');
-
-  // ── Phase 2: Start Express server ──
+  // ── Phase 1: Start Express server immediately ──
   const app = express();
   app.use(cors());
   app.use(express.json());
@@ -59,6 +54,14 @@ async function main() {
   app.listen(config.port, () => {
     console.log(`[server] Listening on http://localhost:${config.port}`);
     console.log(`[server] API docs at http://localhost:${config.port}/docs`);
+  });
+
+  // ── Phase 2: Backfill in background (doesn't block server) ──
+  console.log('[server] Starting backfill in background...');
+  runBackfill().then(() => {
+    console.log('[server] Backfill complete');
+  }).catch((err) => {
+    console.error('[server] Backfill error:', err);
   });
 
   // ── Phase 3: Start recurring polls ──
