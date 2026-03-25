@@ -157,8 +157,8 @@ function DeviceChart({ title, icon, series, lines, yDomain, yScale, yFormatter, 
           )}
           <Tooltip
             contentStyle={{ fontSize: 12, borderRadius: 12, border: '1px solid #e7e5e4', background: '#fff' }}
-            formatter={(value: number | null, name: string) => [
-              value !== null ? `${value.toFixed(1)}` : '—',
+            formatter={(value: any, name: any) => [
+              value != null ? `${Number(value).toFixed(1)}` : '—',
               name,
             ]}
             labelFormatter={(label) => `Time: ${label}`}

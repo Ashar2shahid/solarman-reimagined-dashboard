@@ -65,7 +65,7 @@ export function DailyCurve({ records }: DailyCurveProps) {
           />
           <Tooltip
             contentStyle={{ fontSize: 12, borderRadius: 12, border: '1px solid #e7e5e4', background: '#fff' }}
-            formatter={(value: number | null, name: string) => [value !== null ? `${value.toFixed(2)} kW` : '—', name]}
+            formatter={(value: any, name: any) => [value != null ? `${Number(value).toFixed(2)} kW` : '—', name]}
           />
           <Legend
             wrapperStyle={{ fontSize: 11 }}

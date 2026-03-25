@@ -35,7 +35,6 @@ export function FlowChart({ data, debug = false }: FlowChartProps) {
   const gen = data?.generationPower ?? 0;
   const use = data?.usePower ?? 0;
   const buy = data?.buyPower ?? 0;
-  const gridFeed = data?.gridPower ?? 0;
   const soc = data?.batterySoc ?? 0;
   const charge = data?.chargePower ?? 0;
   const discharge = data?.dischargePower ?? 0;

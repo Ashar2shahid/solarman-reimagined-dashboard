@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { usePolling } from '@/hooks/use-polling';
 import { api, type PeriodRecord } from '@/lib/api';
 import {
-  BarChart, Bar, LineChart, Line, AreaChart, Area,
+  BarChart, Bar, AreaChart, Area,
   XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid,
 } from 'recharts';
 import { formatEnergy } from '@/lib/utils';
@@ -246,7 +246,7 @@ export function HistoryPage() {
               <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
               <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#78716c' }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 10, fill: '#78716c' }} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}kWh`} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v.toFixed(1)} kWh`]} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => [`${Number(v).toFixed(1)} kWh`]} />
               <Legend wrapperStyle={{ fontSize: 11 }} iconType="circle" iconSize={8} />
               <Bar dataKey="production" name="Production" fill="#eab308" radius={[3, 3, 0, 0]} />
               <Bar dataKey="consumption" name="Consumption" fill="#f97316" radius={[3, 3, 0, 0]} opacity={0.7} />
@@ -261,7 +261,7 @@ export function HistoryPage() {
               <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
               <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#78716c' }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 10, fill: '#78716c' }} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}kWh`} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v.toFixed(1)} kWh`]} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => [`${Number(v).toFixed(1)} kWh`]} />
               <Legend wrapperStyle={{ fontSize: 11 }} iconType="circle" iconSize={8} />
               <Bar dataKey="gridFeed" name="Feed-in (Export)" fill="#22c55e" radius={[3, 3, 0, 0]} />
               <Bar dataKey="gridBuy" name="Purchase (Import)" fill="#3b82f6" radius={[3, 3, 0, 0]} opacity={0.7} />
@@ -282,7 +282,7 @@ export function HistoryPage() {
               <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
               <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#78716c' }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 10, fill: '#78716c' }} tickLine={false} axisLine={false} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v.toFixed(1)}%`]} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => [`${Number(v).toFixed(1)}%`]} />
               <Area type="monotone" dataKey="selfUseRatio" name="Self-Use Ratio" stroke="#22c55e" fill="url(#gradSelfUse)" strokeWidth={2} dot={false} />
             </AreaChart>
           </ResponsiveContainer>
@@ -295,7 +295,7 @@ export function HistoryPage() {
               <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
               <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#78716c' }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 10, fill: '#78716c' }} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}kWh`} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v.toFixed(1)} kWh`]} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => [`${Number(v).toFixed(1)} kWh`]} />
               <Legend wrapperStyle={{ fontSize: 11 }} iconType="circle" iconSize={8} />
               <Bar dataKey="charge" name="Charge" fill="#22c55e" radius={[3, 3, 0, 0]} />
               <Bar dataKey="discharge" name="Discharge" fill="#f97316" radius={[3, 3, 0, 0]} opacity={0.7} />
@@ -310,7 +310,7 @@ export function HistoryPage() {
               <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
               <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#78716c' }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 10, fill: '#78716c' }} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}h`} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number, name: string) => [`${v.toFixed(1)} ${name.includes('Yield') ? 'kWh/kWp' : 'h'}`]} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v: any, name: any) => [`${Number(v).toFixed(1)} ${String(name).includes('Yield') ? 'kWh/kWp' : 'h'}`]} />
               <Legend wrapperStyle={{ fontSize: 11 }} iconType="circle" iconSize={8} />
               <Bar dataKey="peakHours" name="Peak Hours" fill="#eab308" radius={[3, 3, 0, 0]} />
               <Bar dataKey="yield" name="Yield (kWh/kWp)" fill="#f97316" radius={[3, 3, 0, 0]} opacity={0.7} />
@@ -325,7 +325,7 @@ export function HistoryPage() {
               <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
               <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#78716c' }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 10, fill: '#78716c' }} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v}`} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`₹${v.toFixed(0)}`]} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => [`₹${Number(v).toFixed(0)}`]} />
               <Bar dataKey="savings" name="Savings (₹)" fill="#16a34a" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -338,7 +338,7 @@ export function HistoryPage() {
               <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
               <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#78716c' }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 10, fill: '#78716c' }} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}kWh`} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v.toFixed(1)} kWh`]} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => [`${Number(v).toFixed(1)} kWh`]} />
               <Bar dataKey="netMetering" name="Net (Export - Import)" fill="#8b5cf6" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
