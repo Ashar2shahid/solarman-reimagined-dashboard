@@ -17,7 +17,7 @@ export function BatteryCard({ data }: BatteryCardProps) {
   const socColor = soc > 50 ? 'bg-battery' : soc > 20 ? 'bg-solar' : 'bg-red-500';
 
   return (
-    <div className="bg-surface rounded-2xl p-5 flex flex-col justify-between">
+    <div className="bg-surface rounded-2xl p-5">
       <div className="flex items-center justify-between">
         <span className="text-sm text-text-muted">Battery Status</span>
         <ArrowUpRight className="w-4 h-4 text-text-muted" />

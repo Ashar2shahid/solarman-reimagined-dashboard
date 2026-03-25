@@ -16,6 +16,7 @@ import deviceRouter from './routes/device.js';
 import weatherRouter from './routes/weather.js';
 import alertsRouter from './routes/alerts.js';
 import statusRouter from './routes/status.js';
+import acRouter from './routes/ac.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -43,6 +44,7 @@ async function main() {
   app.use('/api/weather', weatherRouter);
   app.use('/api/alerts', alertsRouter);
   app.use('/api/status', statusRouter);
+  app.use('/api/ac', acRouter);
 
   app.listen(config.port, () => {
     console.log(`[server] Listening on http://localhost:${config.port}`);

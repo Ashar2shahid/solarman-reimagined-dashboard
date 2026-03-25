@@ -54,9 +54,9 @@ export function FlowChart({ data, debug = false }: FlowChartProps) {
   //   Foundation bottom center: (320, 280)
 
   return (
-    <svg viewBox="0 0 560 340" className="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 35 560 305" className="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
       {/* House image — shifted left and scaled up, left side crops off */}
-      <image href={houseImg} x={-20} y={10} width={560} height={390} />
+      <image href={houseImg} x={0} y={10} width={560} height={390} />
 
       {/* Debug grid */}
       {debug && Array.from({length: 15}, (_, i) => i * 40).map(x =>
@@ -68,46 +68,46 @@ export function FlowChart({ data, debug = false }: FlowChartProps) {
         ))
       )}
 
-      {/* ═══ SOLAR — lower, closer to roof ═══ */}
-      <text x={260} y={50} textAnchor="middle" fontSize="18" fill={gen > 0 ? '#ca8a04' : '#a8a29e'} fontWeight={700}>
+      {/* ═══ SOLAR ═══ */}
+      <text x={280} y={50} textAnchor="middle" fontSize="18" fill={gen > 0 ? '#ca8a04' : '#a8a29e'} fontWeight={700}>
         {formatPower(gen)}
       </text>
-      <text x={260} y={62} textAnchor="middle" fontSize="9" fill="#78716c" fontWeight={600} letterSpacing={1}>SOLAR</text>
-      <FlowLine points="260,72 260,150" active={gen > 0} color="#eab308" />
+      <text x={280} y={62} textAnchor="middle" fontSize="9" fill="#78716c" fontWeight={600} letterSpacing={1}>SOLAR</text>
+      <FlowLine points="280,72 280,150" active={gen > 0} color="#eab308" />
 
-      {/* ═══ HOME — moved left, closer to house ═══ */}
-      <text x={490} y={215} fontSize="18" fill={use > 0 ? '#ea580c' : '#a8a29e'} fontWeight={700} textAnchor="middle">
+      {/* ═══ HOME ═══ */}
+      <text x={510} y={215} fontSize="18" fill={use > 0 ? '#ea580c' : '#a8a29e'} fontWeight={700} textAnchor="middle">
         {formatPower(use)}
       </text>
-      <text x={490} y={228} fontSize="9" fill="#78716c" fontWeight={600} letterSpacing={1} textAnchor="middle">HOME</text>
-      <FlowLine points="344,220 460,220" active={use > 0} color="#f97316" />
+      <text x={510} y={228} fontSize="9" fill="#78716c" fontWeight={600} letterSpacing={1} textAnchor="middle">HOME</text>
+      <FlowLine points="364,220 480,220" active={use > 0} color="#f97316" />
 
-      {/* ═══ POWERWALL — moved left and down ═══ */}
-      <text x={15} y={280} fontSize="12" fill={soc > 20 ? '#16a34a' : '#ef4444'} fontWeight={700} textAnchor="start">
+      {/* ═══ BATTERY ═══ */}
+      <text x={35} y={280} fontSize="12" fill={soc > 20 ? '#16a34a' : '#ef4444'} fontWeight={700} textAnchor="start">
         {isCharging ? formatPower(charge) : isDischarging ? formatPower(discharge) : '0W'} · {soc}%
       </text>
-      <text x={15} y={294} fontSize="9" fill="#78716c" fontWeight={600} letterSpacing={1} textAnchor="start">BATTERY</text>
-      <FlowLine points="90,285 260,248"
+      <text x={35} y={294} fontSize="9" fill="#78716c" fontWeight={600} letterSpacing={1} textAnchor="start">BATTERY</text>
+      <FlowLine points="110,285 280,248"
         active={isCharging || isDischarging} color="#22c55e"
         reverse={isCharging} />
       {!isCharging && !isDischarging && (
-        <FlowLine points="90,285 260,248" active={false} color="#22c55e" />
+        <FlowLine points="110,285 280,248" active={false} color="#22c55e" />
       )}
 
-      {/* ═══ GRID — text centered on same x as line ═══ */}
-      <text x={298} y={325} textAnchor="middle" fontSize="12"
+      {/* ═══ GRID ═══ */}
+      <text x={318} y={325} textAnchor="middle" fontSize="12"
         fill={isOffGrid ? '#a8a29e' : isSelling ? '#16a34a' : '#2563eb'} fontWeight={700}>
         {isOffGrid ? 'OFF' : isSelling ? formatPower(data?.wirePower ?? 0) : formatPower(buy)}
       </text>
-      <text x={298} y={338} textAnchor="middle" fontSize="9" fill="#78716c" fontWeight={600} letterSpacing={1}>
+      <text x={318} y={338} textAnchor="middle" fontSize="9" fill="#78716c" fontWeight={600} letterSpacing={1}>
         {isOffGrid ? 'OFF-GRID' : isSelling ? 'EXPORTING' : 'GRID'}
       </text>
-      <FlowLine points="298,248 298,308"
+      <FlowLine points="318,248 318,308"
         active={!isOffGrid && (isSelling || buy > 0)}
         color={isSelling ? '#22c55e' : '#3b82f6'}
         reverse={isBuying} />
       {isOffGrid && (
-        <FlowLine points="298,248 298,308" active={false} color="#a8a29e" />
+        <FlowLine points="318,248 318,308" active={false} color="#a8a29e" />
       )}
     </svg>
   );

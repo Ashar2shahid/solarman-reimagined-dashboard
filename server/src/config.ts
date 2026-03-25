@@ -12,4 +12,11 @@ export const config = {
     regionLevel1: parseInt(process.env.REGION_LEVEL1 || '0', 10),
     regionLevel2: parseInt(process.env.REGION_LEVEL2 || '0', 10),
   },
+  tuya: {
+    accessId: process.env.TUYA_ACCESS_ID || '',
+    accessSecret: process.env.TUYA_ACCESS_SECRET || '',
+    projectCode: process.env.TUYA_PROJECT_CODE || '',
+    acDeviceId: process.env.TUYA_AC_DEVICE_ID || '',
+    irDeviceId: process.env.TUYA_IR_DEVICE_ID || '',
+  },
 } as const;

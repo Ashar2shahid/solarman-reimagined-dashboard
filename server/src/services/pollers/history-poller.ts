@@ -331,8 +331,8 @@ export async function backfillHistory(): Promise<void> {
     d.setDate(d.getDate() - i);
     const date = dateStr(d.getFullYear(), d.getMonth() + 1, d.getDate());
 
-    // Skip completed past days (always re-fetch today and yesterday)
-    if (i > 1 && hasDailyData(date)) continue;
+    // Skip completed past days (always re-fetch today)
+    if (i > 0 && hasDailyData(date)) continue;
 
     try {
       console.log(`[history] Daily ${date} (${i + 1}/${BACKFILL_DAYS})...`);

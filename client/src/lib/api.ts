@@ -6,6 +6,16 @@ async function get<T>(path: string): Promise<T> {
   return res.json();
 }
 
+async function post<T>(path: string, body: object): Promise<T> {
+  const res = await fetch(`${BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
 // Realtime
 export const api = {
   realtime: {
@@ -33,6 +43,13 @@ export const api = {
     count: () => get<{ count: number }>('/alerts/count'),
   },
   status: () => get<ServerStatus>('/status'),
+  ac: {
+    state: () => get<ACState>('/ac/state'),
+    power: (on: boolean) => post<ACResponse>('/ac/power', { on }),
+    temp: (temp: number) => post<ACResponse>('/ac/temp', { temp }),
+    mode: (mode: number) => post<ACResponse>('/ac/mode', { mode }),
+    fan: (fan: number) => post<ACResponse>('/ac/fan', { fan }),
+  },
 };
 
 // Types
@@ -217,4 +234,16 @@ export interface ServerStatus {
   uptime: number;
   timestamp: number;
   pollers: Record<string, { lastSuccess: number | null; lastError: string | null; runs: number }>;
+}
+
+export interface ACState {
+  power: boolean;
+  temp: number;
+  mode: number;
+  fan: number;
+}
+
+export interface ACResponse {
+  ok: boolean;
+  state: ACState;
 }

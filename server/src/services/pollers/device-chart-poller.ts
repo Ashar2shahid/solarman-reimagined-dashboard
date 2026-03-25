@@ -111,8 +111,8 @@ export async function backfillDeviceChart(): Promise<void> {
     const date = dateStr(d);
 
     // Skip if we already have data (don't re-fetch completed days)
-    // Always re-fetch today and yesterday since they may have new data
-    if (i > 1 && hasDataForDate(date)) {
+    // Always re-fetch today since it may have new data
+    if (i > 0 && hasDataForDate(date)) {
       continue;
     }
 

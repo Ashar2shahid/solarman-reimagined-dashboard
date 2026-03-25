@@ -75,26 +75,18 @@ export async function runBackfill(): Promise<void> {
 
 /** Phase 3: Start recurring scheduled polls. Call after server is listening. */
 export function startScheduledPollers(): void {
-  // Every 1 minute: real-time only
+  // Every 1 minute: real-time data only
   cron.schedule('* * * * *', () => {
     runPoller('realtime', pollRealtime);
     runPoller('device', pollDevice);
   });
 
-  // Every 5 minutes: system stats, alerts
-  cron.schedule('*/5 * * * *', () => {
+  // Every 10 minutes: everything else
+  cron.schedule('*/10 * * * *', () => {
     runPoller('systemStats', pollSystemStats);
     runPoller('alerts', pollAlerts);
-  });
-
-  // Every 15 minutes: weather, energy saved
-  cron.schedule('*/15 * * * *', () => {
     runPoller('weather', pollWeather);
     runPoller('energySaved', pollEnergySaved);
-  });
-
-  // Every 6 hours: refresh current period historical data
-  cron.schedule('0 */6 * * *', () => {
     runPoller('historyCurrent', pollCurrentHistory);
     runPoller('deviceChartCurrent', pollDeviceChart);
   });

@@ -7,6 +7,7 @@ import { FlowChart } from '@/components/dashboard/flow-chart';
 import { DailyCurve } from '@/components/dashboard/daily-curve';
 import { BatteryCard } from '@/components/dashboard/battery-card';
 import { WeatherCard } from '@/components/dashboard/weather-card';
+import { ACCard } from '@/components/dashboard/ac-card';
 import { Thermometer, ArrowUpRight } from 'lucide-react';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import type { PeriodRecord } from '@/lib/api';
@@ -23,7 +24,7 @@ function getStaleColor(timestamp: number | null | undefined): string {
 export function Dashboard() {
   const { data: realtime } = useRealtime(10_000);
   const { data: station } = usePolling(() => api.station(), 10_000);
-  const { data: energySaved } = usePolling(() => api.energySaved(), 60_000);
+
   const { data: device } = usePolling(() => api.device.current(), 10_000);
   const { data: weather } = usePolling(() => api.weather(), 300_000);
 
@@ -38,49 +39,38 @@ export function Dashboard() {
     <div className="space-y-6">
       {/* ── Hero: Title + House + Sidebar Cards ── */}
       {/* Mobile: stacked. Desktop: 3-column grid */}
-      <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:items-start">
-        {/* Left: Title + CO2 */}
-        <div className="lg:col-span-3 pt-2">
-          <div className="flex justify-between items-start lg:block">
-            <div>
-              <div className={`text-xs mb-1 font-medium ${getStaleColor(realtime?.timestamp)}`}>
-                {realtime?.timestamp
-                  ? `Last updated: ${new Date(realtime.timestamp * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}`
-                  : 'Connecting...'}
-              </div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-text leading-tight">{station?.name ?? 'Solar Panel'}</h1>
-              <h1 className="text-2xl lg:text-3xl font-bold text-text leading-tight">management</h1>
-            </div>
-            <div className="text-right lg:hidden text-xs text-text-muted">
-              <div>{station?.installedCapacity ? `${station.installedCapacity} kWp` : ''}</div>
-              <div>{station?.locationAddress}</div>
-            </div>
-          </div>
+      {/* ── Header row ── */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-1">
+        <div className={`text-xs font-medium ${getStaleColor(realtime?.timestamp)}`}>
+          {realtime?.timestamp
+            ? `Last updated: ${new Date(realtime.timestamp * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}`
+            : 'Connecting...'}
+        </div>
+        <h2 className="text-sm font-semibold text-text">{station?.name ?? ''}</h2>
+        <div className="text-right text-xs text-text-muted">
+          <span>{station?.installedCapacity ? `${station.installedCapacity} kWp` : ''}</span>
+          {station?.locationAddress && <span className="ml-2">{station.locationAddress}</span>}
+        </div>
+      </div>
 
-          {/* Temperature Card — hidden on mobile */}
-          <TemperatureCard device={device} className="hidden lg:block mt-6" />
+      {/* ── Hero: Cards + House ── */}
+      <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:items-start">
+        {/* Left: System Card */}
+        <div className="lg:col-span-3">
+          <SystemCard device={device} />
         </div>
 
-        {/* Center: House Energy Flow — full width on mobile */}
+        {/* Center: House Energy Flow */}
         <div className="lg:col-span-6">
           <FlowChart data={realtime} />
         </div>
 
-        {/* Right: Battery + info — full width on mobile */}
-        <div className="lg:col-span-3 pt-0 lg:pt-2">
-          <div className="hidden lg:block text-right text-xs text-text-muted mb-1">
-            {station?.installedCapacity ? `${station.installedCapacity} kWp` : ''}
-          </div>
-          <div className="hidden lg:block text-right text-xs text-text-muted">{station?.locationAddress}</div>
-
-          <div className="lg:mt-6">
-            <BatteryCard data={realtime} />
-          </div>
+        {/* Right: Battery + AC Cards */}
+        <div className="lg:col-span-3 space-y-4">
+          <BatteryCard data={realtime} />
+          <ACCard />
         </div>
       </div>
-
-      {/* Temperature card — mobile only */}
-      <TemperatureCard device={device} className="lg:hidden" />
 
       {/* ── Bottom Cards Row ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -191,7 +181,7 @@ function EnergyOverviewCard({ realtime, dailyRecords, monthlyRecords }: {
               interval={period === 'day' ? 3 : period === 'month' ? 4 : 0} />
             <Tooltip
               contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #e7e5e4', background: '#fff', padding: '4px 8px' }}
-              formatter={(value: number) => [`${value.toFixed(1)} ${period === 'day' ? 'kW' : 'kWh'}`]}
+              formatter={(value) => [`${Number(value).toFixed(1)} ${period === 'day' ? 'kW' : 'kWh'}`]}
             />
             <Area type="monotone" dataKey="production" stroke="#f97316" fill="url(#gradProd)" strokeWidth={2} dot={false} />
             <Area type="monotone" dataKey="consumed" stroke="#a8a29e" fill="none" strokeWidth={1.5} dot={false} strokeDasharray="4 3" />
@@ -208,9 +198,14 @@ function EnergyOverviewCard({ realtime, dailyRecords, monthlyRecords }: {
   );
 }
 
-function TemperatureCard({ device, className = '' }: { device: DeviceCurrent | null; className?: string }) {
-  const batteryTemp = device?.data?.['B_T1']?.value;
-  const inverterTemp = device?.data?.['AC_T']?.value;
+function SystemCard({ device }: { device: DeviceCurrent | null }) {
+  const d = device?.data;
+  const bt = d?.['B_T1']?.value ? parseFloat(d['B_T1'].value) : null;
+  const it = d?.['AC_T']?.value ? parseFloat(d['AC_T'].value) : null;
+  const v1 = d?.['G_V_L1']?.value ? parseFloat(d['G_V_L1'].value) : null;
+  const v2 = d?.['G_V_L2']?.value ? parseFloat(d['G_V_L2'].value) : null;
+  const v3 = d?.['G_V_L3']?.value ? parseFloat(d['G_V_L3'].value) : null;
+  const freq = d?.['PG_F1']?.value ? parseFloat(d['PG_F1'].value) : null;
 
   const getTempColor = (temp: number) => {
     if (temp < 30) return 'text-emerald-600';
@@ -219,29 +214,44 @@ function TemperatureCard({ device, className = '' }: { device: DeviceCurrent | n
     return 'text-red-600';
   };
 
-  const bt = batteryTemp ? parseFloat(batteryTemp) : null;
-  const it = inverterTemp ? parseFloat(inverterTemp) : null;
+  const getVoltColor = (v: number) => {
+    if (v >= 220 && v <= 250) return 'text-emerald-600';
+    if (v >= 200 && v <= 260) return 'text-amber-500';
+    return 'text-red-600';
+  };
+
+  const Row = ({ label, value, color }: { label: string; value: string; color: string }) => (
+    <div className="flex items-center justify-between">
+      <span className="text-xs text-text-muted">{label}</span>
+      <span className={`text-sm font-semibold ${color}`}>{value}</span>
+    </div>
+  );
 
   return (
-    <div className={`bg-surface rounded-2xl p-4 ${className}`}>
-      <div className="flex items-center justify-between mb-3">
+    <div className="bg-surface rounded-2xl p-4">
+      <div className="flex items-center justify-between mb-2">
         <span className="text-xs text-text-muted">Temperature</span>
         <Thermometer className="w-3.5 h-3.5 text-text-muted" />
       </div>
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-text-muted">Battery</span>
-          <span className={`text-lg font-bold ${bt ? getTempColor(bt) : 'text-text-muted'}`}>
-            {bt ? `${bt}°C` : '—'}
-          </span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-text-muted">Inverter</span>
-          <span className={`text-lg font-bold ${it ? getTempColor(it) : 'text-text-muted'}`}>
-            {it ? `${it}°C` : '—'}
-          </span>
+      <div className="space-y-1">
+        <Row label="Battery" value={bt ? `${bt}°C` : '—'} color={bt ? getTempColor(bt) : 'text-text-muted'} />
+        <Row label="Inverter" value={it ? `${it}°C` : '—'} color={it ? getTempColor(it) : 'text-text-muted'} />
+      </div>
+
+      <div className="border-t border-border mt-3 pt-2">
+        <span className="text-xs text-text-muted">Grid Voltage</span>
+        <div className="space-y-1 mt-1">
+          <Row label="L1" value={v1 ? `${v1.toFixed(1)}V` : '—'} color={v1 ? getVoltColor(v1) : 'text-text-muted'} />
+          <Row label="L2" value={v2 ? `${v2.toFixed(1)}V` : '—'} color={v2 ? getVoltColor(v2) : 'text-text-muted'} />
+          <Row label="L3" value={v3 ? `${v3.toFixed(1)}V` : '—'} color={v3 ? getVoltColor(v3) : 'text-text-muted'} />
         </div>
       </div>
+
+      {freq !== null && (
+        <div className="mt-auto pt-2 text-right">
+          <span className="text-[10px] text-text-muted">{freq.toFixed(2)} Hz</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -250,8 +260,8 @@ function EnergyBalanceCard({ generated, consumed }: { generated: number; consume
   const total = generated + consumed || 1;
   const ratio = generated / total;
   const angle = ratio * 180;
-  const r = 50;
-  const cx = 60, cy = 60;
+  const r = 22;
+  const cx = 26, cy = 25;
 
   const arc = (startAngle: number, endAngle: number) => {
     const s = (startAngle - 90) * (Math.PI / 180);
@@ -265,7 +275,7 @@ function EnergyBalanceCard({ generated, consumed }: { generated: number; consume
   };
 
   return (
-    <div className="bg-surface rounded-2xl p-5">
+    <div className="bg-surface rounded-2xl p-5 pb-3">
       <div className="flex items-center justify-between">
         <span className="text-sm text-text-muted">Energy Balance</span>
         <ArrowUpRight className="w-4 h-4 text-text-muted" />
@@ -278,13 +288,13 @@ function EnergyBalanceCard({ generated, consumed }: { generated: number; consume
           <span className="w-2 h-2 rounded-sm bg-gray-200" /> Consumed
         </span>
       </div>
-      <div className="flex items-center justify-center py-3">
-        <svg width={120} height={70} viewBox="0 0 120 70">
-          <path d={arc(-90, 90)} fill="none" stroke="#e7e5e4" strokeWidth={8} strokeLinecap="round" />
-          <path d={arc(-90, -90 + angle)} fill="none" stroke="#f97316" strokeWidth={8} strokeLinecap="round" />
+      <div className="flex items-center justify-center">
+        <svg width="70%" viewBox="0 0 52 28" preserveAspectRatio="xMidYMax meet">
+          <path d={arc(-90, 90)} fill="none" stroke="#e7e5e4" strokeWidth={1.5} strokeLinecap="round" />
+          <path d={arc(-90, -90 + angle)} fill="none" stroke="#f97316" strokeWidth={1.5} strokeLinecap="round" />
         </svg>
       </div>
-      <div className="flex justify-center gap-6 text-xs">
+      <div className="flex justify-center gap-6 text-xs -mt-3">
         <span className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-primary" />
           <strong className="text-text">{formatEnergy(generated)}</strong>

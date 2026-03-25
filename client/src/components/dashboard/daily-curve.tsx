@@ -1,19 +1,39 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import type { DailyRecord } from '@/lib/api';
-import { unixToTime } from '@/lib/utils';
 
 interface DailyCurveProps {
   records: DailyRecord[];
 }
 
 export function DailyCurve({ records }: DailyCurveProps) {
-  const chartData = records.map(r => ({
-    time: unixToTime(r.timestamp),
-    production: (r.generationPower ?? 0) / 1000,
-    consumption: (r.usePower ?? 0) / 1000,
-    grid: (r.wirePower ?? 0) / 1000,
-    soc: r.batterySoc ?? 0,
-  }));
+  // Build a full 24-hour axis (every 5 min = 288 slots)
+  const hourLabels: string[] = [];
+  for (let h = 0; h < 24; h++) {
+    for (let m = 0; m < 60; m += 5) {
+      hourLabels.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+    }
+  }
+
+  // Index actual records by HH:MM
+  const dataByTime = new Map<string, DailyRecord>();
+  for (const r of records) {
+    const d = new Date(r.timestamp * 1000);
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(Math.floor(d.getMinutes() / 5) * 5).padStart(2, '0');
+    dataByTime.set(`${hh}:${mm}`, r);
+  }
+
+  const chartData = hourLabels.map(time => {
+    const r = dataByTime.get(time);
+    return {
+      time,
+      production: r ? (r.generationPower ?? 0) / 1000 : null,
+      consumption: r ? (r.usePower ?? 0) / 1000 : null,
+    };
+  });
+
+  // Show ticks every 3 hours
+  const tickValues = ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00', '24:00'];
 
   return (
     <div className="bg-surface rounded-2xl p-5">
@@ -35,7 +55,7 @@ export function DailyCurve({ records }: DailyCurveProps) {
             tick={{ fontSize: 10, fill: '#78716c' }}
             tickLine={false}
             axisLine={false}
-            interval={Math.floor(chartData.length / 8)}
+            ticks={tickValues}
           />
           <YAxis
             tick={{ fontSize: 10, fill: '#78716c' }}
@@ -45,7 +65,7 @@ export function DailyCurve({ records }: DailyCurveProps) {
           />
           <Tooltip
             contentStyle={{ fontSize: 12, borderRadius: 12, border: '1px solid #e7e5e4', background: '#fff' }}
-            formatter={(value: number, name: string) => [`${value.toFixed(2)} kW`, name]}
+            formatter={(value: number | null, name: string) => [value !== null ? `${value.toFixed(2)} kW` : '—', name]}
           />
           <Legend
             wrapperStyle={{ fontSize: 11 }}
@@ -60,6 +80,7 @@ export function DailyCurve({ records }: DailyCurveProps) {
             fill="url(#gradSolar)"
             strokeWidth={2}
             dot={false}
+            connectNulls={false}
           />
           <Area
             type="monotone"
@@ -69,6 +90,7 @@ export function DailyCurve({ records }: DailyCurveProps) {
             fill="url(#gradConsumption)"
             strokeWidth={2}
             dot={false}
+            connectNulls={false}
           />
         </AreaChart>
       </ResponsiveContainer>

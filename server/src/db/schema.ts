@@ -267,3 +267,13 @@ export const deviceChartData = sqliteTable('device_chart_data', {
   primaryKey({ columns: [table.deviceId, table.storageName, table.collectionTime] }),
   index('idx_device_chart_date').on(table.deviceId, table.storageName, table.date),
 ]);
+
+// 15. AC state persistence (single row)
+export const acState = sqliteTable('ac_state', {
+  key: text('key').primaryKey(),
+  power: integer('power', { mode: 'boolean' }).notNull().default(false),
+  temp: integer('temp').notNull().default(24),
+  mode: integer('mode').notNull().default(0),
+  fan: integer('fan').notNull().default(0),
+  updatedAt: integer('updated_at').notNull(),
+});
