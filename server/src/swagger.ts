@@ -481,7 +481,6 @@ export const swaggerDocument = {
           batteryStatus: { type: 'string' },
         },
       },
-    },
       ACState: {
         type: 'object',
         properties: {
