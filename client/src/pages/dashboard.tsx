@@ -145,7 +145,7 @@ function EnergyOverviewCard({ realtime, dailyRecords, monthlyRecords }: {
   }
 
   return (
-    <div className="bg-surface rounded-2xl p-5">
+    <div className="bg-surface rounded-2xl p-5 flex flex-col h-full">
       <div className="flex items-center justify-between">
         <span className="text-sm text-text-muted">Energy Overview</span>
         <div className="flex gap-1">
@@ -168,7 +168,7 @@ function EnergyOverviewCard({ realtime, dailyRecords, monthlyRecords }: {
       </div>
 
       {/* Mini area chart */}
-      <div className="mt-2" style={{ height: 80 }}>
+      <div className="mt-2 flex-1 min-h-[80px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
             <defs>

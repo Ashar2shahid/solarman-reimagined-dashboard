@@ -103,7 +103,7 @@ function detectOutageGaps(series: DeviceChartSeries[]): { x1: string; x2: string
   return gaps;
 }
 
-function DeviceChart({ title, icon, series, lines, yDomain, yScale, yFormatter, referenceLines, outageGaps, yBands, rightAxis }: {
+function DeviceChart({ title, icon, series, lines, yDomain, yScale, yFormatter, referenceLines, outageGaps, yBands, rightAxis, acEvents }: {
   title: string;
   icon: React.ReactNode;
   series: DeviceChartSeries[];
@@ -115,8 +115,26 @@ function DeviceChart({ title, icon, series, lines, yDomain, yScale, yFormatter, 
   outageGaps?: { x1: string; x2: string }[];
   yBands?: { y1: number; y2: number; fill: string; opacity: number; label?: string }[];
   rightAxis?: { domain?: [number | string, number | string]; formatter?: (v: number) => string };
+  acEvents?: { timestamp: number; action: string; temp: number | null }[];
 }) {
   const chartData = buildFullDayChart(series);
+
+  // Inject AC event times into chart data so ReferenceLine can find them
+  if (acEvents?.length) {
+    const existingTimes = new Set(chartData.map(d => d.time));
+    for (const ev of acEvents) {
+      const d = new Date(ev.timestamp * 1000);
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      const timeStr = `${hh}:${mm}`;
+      if (!existingTimes.has(timeStr)) {
+        chartData.push({ time: timeStr });
+        existingTimes.add(timeStr);
+      }
+    }
+    chartData.sort((a, b) => (a.time as string).localeCompare(b.time as string));
+  }
+
   const hasRightAxis = rightAxis || lines.some(l => l.axis === 'right');
 
   return (
@@ -174,6 +192,25 @@ function DeviceChart({ title, icon, series, lines, yDomain, yScale, yFormatter, 
             <ReferenceLine key={rl.label} y={rl.y} stroke={rl.color} strokeDasharray="4 4" strokeWidth={1} yAxisId="left">
             </ReferenceLine>
           ))}
+          {acEvents?.map((ev, i) => {
+            const d = new Date(ev.timestamp * 1000);
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mm = String(d.getMinutes()).padStart(2, '0');
+            const timeStr = `${hh}:${mm}`;
+            const isOn = ev.action === 'power_on' || ev.action === 'set_temp';
+            const label = ev.action === 'power_off' ? 'AC Off' : `AC ${ev.temp ?? ''}°C`;
+            return (
+              <ReferenceLine
+                key={`ac-${i}`}
+                x={timeStr}
+                stroke={isOn ? '#3b82f6' : '#6b7280'}
+                strokeDasharray="3 3"
+                strokeWidth={1.5}
+                yAxisId="left"
+                label={{ value: label, fontSize: 10, fill: isOn ? '#3b82f6' : '#6b7280', position: i % 2 === 0 ? 'insideTopRight' : 'insideBottomRight', offset: 4 }}
+              />
+            );
+          })}
           {lines.map(l => (
             <Line
               key={l.key}
@@ -291,6 +328,7 @@ export function DevicePage() {
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
 
   const { data: tempSeries } = usePolling(() => api.device.chart(date, TEMP_PARAMS), 60_000, [date]);
+  const { data: acEvents } = usePolling(() => api.ac.events(date), 60_000, [date]);
   const { data: voltageSeries } = usePolling(() => api.device.chart(date, VOLTAGE_PARAMS), 60_000, [date]);
   const { data: pvVoltageSeries } = usePolling(() => api.device.chart(date, PV_VOLTAGE_PARAMS), 60_000, [date]);
   const { data: pvPowerSeries } = usePolling(() => api.device.chart(date, PV_POWER_PARAMS), 60_000, [date]);
@@ -325,16 +363,17 @@ export function DevicePage() {
         yDomain={[0, 60]}
         yFormatter={(v) => `${v}°C`}
         yBands={[
-          { y1: 0, y2: 30, fill: '#22c55e', opacity: 0.06 },    // Safe (green)
-          { y1: 30, y2: 40, fill: '#eab308', opacity: 0.06 },    // Warm (yellow)
-          { y1: 40, y2: 50, fill: '#f97316', opacity: 0.08 },    // Hot (orange)
-          { y1: 50, y2: 60, fill: '#ef4444', opacity: 0.10 },    // Danger (red)
+          { y1: 0, y2: 30, fill: '#22c55e', opacity: 0.06 },
+          { y1: 30, y2: 40, fill: '#eab308', opacity: 0.06 },
+          { y1: 40, y2: 50, fill: '#f97316', opacity: 0.08 },
+          { y1: 50, y2: 60, fill: '#ef4444', opacity: 0.10 },
         ]}
         referenceLines={[
           { y: 30, label: '', color: '#22c55e' },
           { y: 40, label: '', color: '#eab308' },
           { y: 50, label: '', color: '#ef4444' },
         ]}
+        acEvents={acEvents ?? undefined}
       />
 
       <DeviceChart

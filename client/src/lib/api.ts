@@ -49,6 +49,7 @@ export const api = {
     temp: (temp: number) => post<ACResponse>('/ac/temp', { temp }),
     mode: (mode: number) => post<ACResponse>('/ac/mode', { mode }),
     fan: (fan: number) => post<ACResponse>('/ac/fan', { fan }),
+    events: (date: string) => get<ACEvent[]>(`/ac/events?date=${date}`),
   },
 };
 
@@ -246,4 +247,11 @@ export interface ACState {
 export interface ACResponse {
   ok: boolean;
   state: ACState;
+}
+
+export interface ACEvent {
+  id: number;
+  timestamp: number;
+  action: string;
+  temp: number | null;
 }

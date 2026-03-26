@@ -277,3 +277,13 @@ export const acState = sqliteTable('ac_state', {
   fan: integer('fan').notNull().default(0),
   updatedAt: integer('updated_at').notNull(),
 });
+
+// 16. AC event log (power on/off + temp changes)
+export const acEvents = sqliteTable('ac_events', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  timestamp: integer('timestamp').notNull(),
+  action: text('action').notNull(), // 'power_on', 'power_off', 'set_temp'
+  temp: integer('temp'),
+}, (table) => [
+  index('idx_ac_events_timestamp').on(table.timestamp),
+]);

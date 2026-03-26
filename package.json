@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "dev": "cd server && npx tsx src/index.ts & cd client && npx vite --host --port 5173 &",
+    "dev:kill": "pkill -f 'tsx src/index.ts' ; pkill -f 'vite' ; echo 'killed'",
     "install:all": "cd client && npm install && cd ../server && npm install",
     "build": "cd client && npm run build && cd ../server && npx drizzle-kit push",
     "start": "cd server && npm start"

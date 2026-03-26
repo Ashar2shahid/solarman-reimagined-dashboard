@@ -21,7 +21,7 @@ export function WeatherCard({ weather }: WeatherCardProps) {
   const forecast = weather.slice(1, 5);
 
   return (
-    <div className="bg-surface rounded-2xl p-5">
+    <div className="bg-surface rounded-2xl p-5 flex flex-col h-full">
       <h3 className="text-sm font-semibold text-text mb-3">{today.regionName ?? 'Weather'}</h3>
 
       <div className="flex items-center gap-4 mb-4">
@@ -34,7 +34,7 @@ export function WeatherCard({ weather }: WeatherCardProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-4 gap-2 mt-auto">
         {forecast.map(day => (
           <div key={day.date} className="text-center">
             <div className="text-[10px] text-text-muted">{new Date(day.date).toLocaleDateString('en', { weekday: 'short' })}</div>
