@@ -17,6 +17,8 @@ import weatherRouter from './routes/weather.js';
 import alertsRouter from './routes/alerts.js';
 import statusRouter from './routes/status.js';
 import acRouter from './routes/ac.js';
+import notificationsRouter from './routes/notifications.js';
+import settingsRouter from './routes/settings.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -40,6 +42,8 @@ async function main() {
   app.use('/api/alerts', alertsRouter);
   app.use('/api/status', statusRouter);
   app.use('/api/ac', acRouter);
+  app.use('/api/notifications', notificationsRouter);
+  app.use('/api/settings', settingsRouter);
 
   // Serve built client in production
   const clientDist = resolve(__dirname, '../../client/dist');

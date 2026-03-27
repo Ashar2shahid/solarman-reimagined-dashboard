@@ -5,6 +5,7 @@ import { pollDevice } from './pollers/device-poller.js';
 import { backfillHistory, pollCurrentHistory } from './pollers/history-poller.js';
 import { pollWeather, pollEnergySaved, pollAlerts, pollSystemStats } from './pollers/misc-poller.js';
 import { pollDeviceParams, backfillDeviceChart, pollDeviceChart } from './pollers/device-chart-poller.js';
+import { checkAlerts } from './alert-checker.js';
 
 interface PollerStatus {
   lastSuccess: number | null;
@@ -75,10 +76,13 @@ export async function runBackfill(): Promise<void> {
 
 /** Phase 3: Start recurring scheduled polls. Call after server is listening. */
 export function startScheduledPollers(): void {
-  // Every 1 minute: real-time data only
-  cron.schedule('* * * * *', () => {
-    runPoller('realtime', pollRealtime);
-    runPoller('device', pollDevice);
+  // Every 1 minute: real-time data + alert checks
+  cron.schedule('* * * * *', async () => {
+    await Promise.all([
+      runPoller('realtime', pollRealtime),
+      runPoller('device', pollDevice),
+    ]);
+    checkAlerts();
   });
 
   // Every 10 minutes: everything else

@@ -43,6 +43,16 @@ export const api = {
     count: () => get<{ count: number }>('/alerts/count'),
   },
   status: () => get<ServerStatus>('/status'),
+  settings: {
+    get: () => get<Record<string, string>>('/settings'),
+    update: (settings: Record<string, string>) => post<{ ok: boolean; settings: Record<string, string> }>('/settings', settings),
+  },
+  notifications: {
+    list: () => get<Notification[]>('/notifications'),
+    unread: () => get<{ count: number }>('/notifications/unread'),
+    markRead: (id: number) => post<{ ok: boolean }>(`/notifications/${id}/read`, {}),
+    markAllRead: () => post<{ ok: boolean }>('/notifications/read-all', {}),
+  },
   ac: {
     state: () => get<ACState>('/ac/state'),
     power: (on: boolean) => post<ACResponse>('/ac/power', { on }),
@@ -254,4 +264,15 @@ export interface ACEvent {
   timestamp: number;
   action: string;
   temp: number | null;
+}
+
+export interface Notification {
+  id: number;
+  timestamp: number;
+  type: string;
+  title: string;
+  message: string;
+  severity: 'info' | 'warning' | 'critical';
+  value: number | null;
+  read: boolean;
 }

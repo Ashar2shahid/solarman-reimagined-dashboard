@@ -287,3 +287,24 @@ export const acEvents = sqliteTable('ac_events', {
 }, (table) => [
   index('idx_ac_events_timestamp').on(table.timestamp),
 ]);
+
+// 17. App settings (key-value store)
+export const appSettings = sqliteTable('app_settings', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
+});
+
+// 18. System notifications (temperature alerts, grid outages, etc.)
+export const notifications = sqliteTable('notifications', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  timestamp: integer('timestamp').notNull(),
+  type: text('type').notNull(), // 'temp_warning', 'temp_critical', 'grid_outage', 'grid_restore', 'battery_low', 'battery_full'
+  title: text('title').notNull(),
+  message: text('message').notNull(),
+  severity: text('severity').notNull(), // 'info', 'warning', 'critical'
+  value: real('value'), // the value that triggered the alert
+  read: integer('read', { mode: 'boolean' }).notNull().default(false),
+}, (table) => [
+  index('idx_notifications_timestamp').on(table.timestamp),
+  index('idx_notifications_read').on(table.read),
+]);

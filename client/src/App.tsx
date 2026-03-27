@@ -3,21 +3,19 @@ import { Header } from '@/components/layout/header';
 import { Dashboard } from '@/pages/dashboard';
 import { DevicePage } from '@/pages/device';
 import { HistoryPage } from '@/pages/history';
-import { useQuery } from '@/hooks/use-query';
-import { api } from '@/lib/api';
+import { SettingsPage } from '@/pages/settings';
 
 function App() {
-  const { data: alertData } = useQuery(() => api.alerts.count(), []);
-
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-background">
-        <Header alertCount={alertData?.count ?? 0} />
+        <Header />
         <main className="px-6 py-6">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/device" element={<DevicePage />} />
             <Route path="/history" element={<HistoryPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </main>
       </div>
