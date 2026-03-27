@@ -6,6 +6,7 @@ import { backfillHistory, pollCurrentHistory } from './pollers/history-poller.js
 import { pollWeather, pollEnergySaved, pollAlerts, pollSystemStats } from './pollers/misc-poller.js';
 import { pollDeviceParams, backfillDeviceChart, pollDeviceChart } from './pollers/device-chart-poller.js';
 import { checkAlerts } from './alert-checker.js';
+import { checkAutoAc } from './auto-ac.js';
 
 interface PollerStatus {
   lastSuccess: number | null;
@@ -83,6 +84,7 @@ export function startScheduledPollers(): void {
       runPoller('device', pollDevice),
     ]);
     checkAlerts();
+    checkAutoAc();
   });
 
   // Every 10 minutes: everything else

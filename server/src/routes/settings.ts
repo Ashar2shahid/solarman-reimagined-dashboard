@@ -22,6 +22,14 @@ const DEFAULTS: Record<string, string> = {
   'suppress_temp_if_ac_cooling': 'true',
   'suppress_temp_check_minutes': '10',
   'alert_cooldown_minutes': '10',
+  // Auto AC
+  'auto_ac_enabled': 'false',
+  'auto_ac_target_temp': '24',
+  'auto_ac_turn_on_inverter': '45',
+  'auto_ac_turn_on_battery': '35',
+  'auto_ac_turn_off_inverter': '38',
+  'auto_ac_turn_off_battery': '30',
+  'auto_ac_min_on_minutes': '15',
 };
 
 function getSetting(key: string): string {
@@ -86,5 +94,14 @@ export function getAlertThresholds() {
     suppress_temp_if_ac_cooling: getSetting('suppress_temp_if_ac_cooling') === 'true',
     suppress_temp_check_minutes: parseInt(getSetting('suppress_temp_check_minutes')),
     cooldown_seconds: parseInt(getSetting('alert_cooldown_minutes')) * 60,
+    auto_ac: {
+      enabled: getSetting('auto_ac_enabled') === 'true',
+      targetTemp: parseInt(getSetting('auto_ac_target_temp')),
+      turnOnInverter: parseFloat(getSetting('auto_ac_turn_on_inverter')),
+      turnOnBattery: parseFloat(getSetting('auto_ac_turn_on_battery')),
+      turnOffInverter: parseFloat(getSetting('auto_ac_turn_off_inverter')),
+      turnOffBattery: parseFloat(getSetting('auto_ac_turn_off_battery')),
+      minOnMinutes: parseInt(getSetting('auto_ac_min_on_minutes')),
+    },
   };
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
-import { Save, RotateCcw, Thermometer, Battery, Clock, Zap, Plus, Trash2 } from 'lucide-react';
+import { Save, RotateCcw, Thermometer, Battery, Clock, Zap, Plus, Trash2, Snowflake } from 'lucide-react';
 
 interface SocLevel {
   level: number;
@@ -80,11 +80,12 @@ export function SettingsPage() {
 
   const gridOutageEnabled = settings.grid_outage_enabled === 'true';
   const suppressAcCooling = settings.suppress_temp_if_ac_cooling === 'true';
+  const autoAcEnabled = settings.auto_ac_enabled === 'true';
 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-bold text-text">Alert Settings</h2>
+        <h2 className="text-lg font-bold text-text">Settings</h2>
         <div className="flex items-center gap-2">
           {hasChanges && (
             <button
@@ -230,6 +231,51 @@ export function SettingsPage() {
           </div>
           {suppressAcCooling && (
             <SettingRow label="Check Window" desc="Minutes to check if temp has decreased" value={settings.suppress_temp_check_minutes} unit="min" onChange={v => updateSetting('suppress_temp_check_minutes', v)} />
+          )}
+        </div>
+
+        {/* Auto AC */}
+        <div className="bg-surface rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Snowflake className="w-4 h-4 text-blue-500" />
+              <div>
+                <h3 className="text-sm font-semibold text-text">Automatic AC Control</h3>
+                <p className="text-[11px] text-text-muted">Auto on/off based on temperature thresholds</p>
+              </div>
+            </div>
+            <button
+              onClick={() => updateSetting('auto_ac_enabled', autoAcEnabled ? 'false' : 'true')}
+              className={`w-10 h-6 rounded-full transition-colors relative ${
+                autoAcEnabled ? 'bg-green-500' : 'bg-stone-300'
+              }`}
+            >
+              <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${
+                autoAcEnabled ? 'translate-x-5' : 'translate-x-1'
+              }`} />
+            </button>
+          </div>
+          {autoAcEnabled && (
+            <div className="space-y-3">
+              <SettingRow label="AC Temperature" desc="Temperature to set when AC turns on" value={settings.auto_ac_target_temp} unit="°C" onChange={v => updateSetting('auto_ac_target_temp', v)} />
+              <div className="border-t border-border pt-3">
+                <div className="text-[11px] text-text-muted mb-2">Turn ON when either temp exceeds:</div>
+                <SettingRow label="Inverter above" desc="Auto turn on AC" value={settings.auto_ac_turn_on_inverter} unit="°C" onChange={v => updateSetting('auto_ac_turn_on_inverter', v)} />
+                <div className="mt-2">
+                  <SettingRow label="Battery above" desc="Auto turn on AC" value={settings.auto_ac_turn_on_battery} unit="°C" onChange={v => updateSetting('auto_ac_turn_on_battery', v)} />
+                </div>
+              </div>
+              <div className="border-t border-border pt-3">
+                <div className="text-[11px] text-text-muted mb-2">Turn OFF when both temps drop below:</div>
+                <SettingRow label="Inverter below" desc="Turn off threshold for inverter" value={settings.auto_ac_turn_off_inverter} unit="°C" onChange={v => updateSetting('auto_ac_turn_off_inverter', v)} />
+                <div className="mt-2">
+                  <SettingRow label="Battery below" desc="Turn off threshold for battery" value={settings.auto_ac_turn_off_battery} unit="°C" onChange={v => updateSetting('auto_ac_turn_off_battery', v)} />
+                </div>
+              </div>
+              <div className="border-t border-border pt-3">
+                <SettingRow label="Min ON time" desc="Minimum minutes AC stays on before auto-off" value={settings.auto_ac_min_on_minutes} unit="min" onChange={v => updateSetting('auto_ac_min_on_minutes', v)} />
+              </div>
+            </div>
           )}
         </div>
 
