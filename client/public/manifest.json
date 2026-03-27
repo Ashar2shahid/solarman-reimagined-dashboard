@@ -4,7 +4,6 @@
   "description": "Solar monitoring dashboard",
   "start_url": "/",
   "display": "fullscreen",
-  "orientation": "landscape",
   "background_color": "#f5f0e8",
   "theme_color": "#f5f0e8",
   "icons": [
